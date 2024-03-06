@@ -1,6 +1,7 @@
 # Residual-Guidance Diffusion Model for Sparse-View CT Reconstuction  
-![concept](./figs/workflow.jpg)
 ![concept](./figs/tweedie.jpg)
+![concept](./figs/workflow.jpg)
+
 
 ## Environment
 
