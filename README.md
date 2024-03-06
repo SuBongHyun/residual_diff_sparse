@@ -3,7 +3,7 @@
 
 ## Environment
 
-After conda install, follow the ```install.sh``` script. we provide an torch environment. 
+After conda install, follow the ```install.sh``` script. we provide a torch environment. 
 ```bash
 source install.sh
 ```
