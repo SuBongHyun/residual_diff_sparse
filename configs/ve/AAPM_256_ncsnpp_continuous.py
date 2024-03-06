@@ -16,8 +16,8 @@ def get_config():
 
   # data
   data = config.data
-  data.dataset = 'aapm'
-  data.root = '/media/harry/tomo/AAPM_data/256'
+  data.dataset = 'AAPM'
+  data.root = '/mnt/sda/AAPM_data/'
   data.is_complex = False
   data.is_multi = False
   data.image_size = 256
