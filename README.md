@@ -10,5 +10,6 @@ Run the following command.
 ```
 python run_CT_recon.py
 ```
-Code is heavily based on [MCG]([https://github.com/HJ-harry/MCG_diffusion]). 
+
+Code is heavily based on [MCG](https://github.com/HJ-harry/MCG_diffusion). 
 We highly appreciate your support for sharing code.
