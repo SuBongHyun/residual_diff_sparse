@@ -1,5 +1,6 @@
 # Residual-Guidance Diffusion Model for Sparse-View CT Reconstuction  
 ![concept](./figs/workflow.jpg)
+![concept](./figs/tweedie.jpg)
 
 ## Environment
 
@@ -7,7 +8,7 @@ After conda install, follow the ```install.sh``` script. we provide a torch envi
 ```bash
 source install.sh
 ```
-After then, install a [torch-radon](https://github.com/matteo-ronchetti/torch-radon) for fan-beam simulation. 
+Then, install a [torch-radon](https://github.com/matteo-ronchetti/torch-radon) for fan-beam simulation. 
 you can find other dependencies in  ```requirements.txt```.
 
 ## Training
@@ -27,4 +28,5 @@ python run_CT_recon.py
 ```
 
 Code is heavily based on [score-mri](https://github.com/HJ-harry/score-MRI) and [MCG](https://github.com/HJ-harry/MCG_diffusion). 
+
 We highly appreciate your support for sharing code.
