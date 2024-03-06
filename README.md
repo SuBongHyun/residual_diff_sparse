@@ -1,7 +1,7 @@
 # [2024 MICCAI] Residual-Guidance Diffusion Model for Sparse-View CT Reconstuction  
 ![concept](./figs/workflow.jpg)
 ![concept](./figs/tweedie.jpg)
-![concept](./figs/results_colorization_CT.jpg)
+
 
 
 > 
