@@ -15,9 +15,6 @@
 
 # pylint: skip-file
 """Return training and evaluation/test datasets from config files."""
-import jax
-import tensorflow as tf
-import tensorflow_datasets as tfds
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 
@@ -226,7 +223,7 @@ class fastmri_knee(Dataset):
 class AAPM(Dataset):
   def __init__(self, root, sort):
     self.root = root
-    self.data_list = list(root.glob('full_dose/*.npy'))
+    self.data_list = list(root.glob('*.npy'))
     self.sort = sort
     if sort:
       self.data_list = sorted(self.data_list)
@@ -240,6 +237,39 @@ class AAPM(Dataset):
     data = np.expand_dims(data, axis=0)
     return data
 
+
+class Object5(Dataset):
+  def __init__(self, root, slice, fast=False):
+    """
+    slice - range of the 2000 _volumes_ that you want,
+    but the dataset will return images, so will be 256 times longer
+
+    fast - set to true to get a tiny version of the dataset
+    """
+    if fast:
+      self.NUM_SLICES = 10
+    else:
+      self.NUM_SLICES = 256
+
+
+    self.root = root
+    self.data_list = list(root.glob('*.npz'))
+
+    if len(self.data_list) == 0:
+      raise ValueError(f"No npz files found in {root}")
+
+    self.data_list = sorted(self.data_list)[slice]
+
+  def __len__(self):
+    return len(self.data_list) * self.NUM_SLICES
+
+  def __getitem__(self, idx):
+    vol_index = idx // self.NUM_SLICES
+    slice_index = idx % self.NUM_SLICES
+    fname = self.data_list[vol_index]
+    data = np.load(fname)['x'][slice_index]
+    data = np.expand_dims(data, axis=0)
+    return data
 
 class fastmri_knee_infer(Dataset):
   """ Simple pytorch dataset for fastmri knee singlecoil dataset """
@@ -297,7 +327,16 @@ class fastmri_knee_magpha_infer(Dataset):
 
 def create_dataloader(configs, evaluation=False, sort=True):
   shuffle = True if not evaluation else False
-  if configs.data.is_multi:
+  if configs.data.dataset == 'Object5':
+    train_dataset = Object5(Path(configs.data.root), slice(None,1800))  
+    val_dataset = Object5(Path(configs.data.root), slice(1800,None)) 
+  elif configs.data.dataset == 'Object5Fast':
+    train_dataset = Object5(Path(configs.data.root), slice(None,1), fast=True)
+    val_dataset = Object5(Path(configs.data.root), slice(1,2), fast=True)
+  elif configs.data.dataset == 'AAPM':
+    train_dataset = AAPM(Path(configs.data.root) / f'train', sort=False)
+    val_dataset = AAPM(Path(configs.data.root) / f'test', sort=True)
+  elif configs.data.is_multi:
     train_dataset = fastmri_knee(Path(configs.data.root) / f'knee_multicoil_{configs.data.image_size}_train')
     val_dataset = fastmri_knee_infer(Path(configs.data.root) / f'knee_{configs.data.image_size}_val', sort=sort)
   elif configs.data.is_complex:
@@ -307,9 +346,11 @@ def create_dataloader(configs, evaluation=False, sort=True):
     else:
       train_dataset = fastmri_knee(Path(configs.data.root) / f'knee_complex_{configs.data.image_size}_train', is_complex=True)
       val_dataset = fastmri_knee_infer(Path(configs.data.root) / f'knee_complex_{configs.data.image_size}_val', is_complex=True)
-  else:
+  elif configs.data.dataset == 'fastmri_knee':
     train_dataset = fastmri_knee(Path(configs.data.root) / f'knee_{configs.data.image_size}_train')
     val_dataset = fastmri_knee_infer(Path(configs.data.root) / f'knee_{configs.data.image_size}_val', sort=sort)
+  else:
+    raise ValueError(f'Dataset {configs.data.dataset} not recognized.')
 
   train_loader = DataLoader(
     dataset=train_dataset,
@@ -326,25 +367,6 @@ def create_dataloader(configs, evaluation=False, sort=True):
   )
   return train_loader, val_loader
 
-
-def create_dataloader_AAPM(configs, evaluation=False, sort=True):
-  shuffle = True if not evaluation else False
-  train_dataset = AAPM(Path(configs.data.root) / f'train', sort=False)
-  val_dataset = AAPM(Path(configs.data.root) / f'test', sort=True)
-
-  train_loader = DataLoader(
-    dataset=train_dataset,
-    batch_size=configs.training.batch_size,
-    shuffle=shuffle,
-    drop_last=True
-  )
-  val_loader = DataLoader(
-    dataset=val_dataset,
-    batch_size=configs.training.batch_size,
-    shuffle=False,
-    drop_last=True
-  )
-  return train_loader, val_loader
 
 
 def create_dataloader_regression(configs, evaluation=False):
